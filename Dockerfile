@@ -1,8 +1,8 @@
 # Errbot - the pluggable chatbot
 
-FROM debian:stretch-slim
+FROM python:3.8-slim
 
-MAINTAINER Rafael Römhild <rafael@roemhild.de>
+MAINTAINER hilt <hilt@cafeinfosec.com>
 
 ENV ERR_USER err
 ENV DEBIAN_FRONTEND noninteractive
@@ -53,12 +53,14 @@ COPY requirements.txt /app/requirements.txt
 RUN virtualenv /app/venv
 RUN . /app/venv/bin/activate; pip install --no-cache-dir -r /app/requirements.txt
 
+# add zulip backend
+RUN git clone https://github.com/zulip/errbot-backend-zulip.git /zulip-backend
+
 COPY config.py /app/config.py
 COPY run.sh /app/venv/bin/run.sh
 
-RUN mkdir /srv/data /srv/plugins /srv/errbackends && chown -R $ERR_USER: /srv /app
+RUN mkdir /srv/data /srv/plugins && chown -R $ERR_USER: /srv /app /zulip-backend
 
-EXPOSE 3141 3142
 VOLUME ["/srv"]
 
 ENTRYPOINT ["/app/venv/bin/run.sh"]
